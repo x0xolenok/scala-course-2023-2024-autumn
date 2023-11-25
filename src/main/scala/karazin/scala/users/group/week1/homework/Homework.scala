@@ -42,27 +42,98 @@ object Homework :
 
     val int = 42
 
-    def not(b: Boolean): Boolean = ??? // here is my greatest solution
+    def not(b: Boolean): Boolean =  {
+      if (b) {
+        false
+      } else {
+        true
+      }
+    }
+    
+    def and(left: Boolean, right: Boolean): Boolean = {
+      if (left) {
+        right
+      } else {
+        false
+      }
+    }
 
-    def and(left: Boolean, right: Boolean): Boolean = ???
-
-    def or(left: Boolean, right: Boolean): Boolean = ???
+    def or(left: Boolean, right: Boolean): Boolean = {
+      if (left) {
+        true
+      } else right
+    }
 
   end `Boolean Operators`
 
   object `Fermat Numbers` :
 
-    val multiplication: (BigInt, BigInt) => BigInt = ???
+    val multiplication: (BigInt, BigInt) => BigInt = (left, right) => {
+      @tailrec
+      def multiplicationReq(left: BigInt, right: BigInt, acc: BigInt): BigInt = {
+        if (`Boolean Operators`.and(right < 0, left < 0)) {
+          multiplicationReq(-left, -right, acc)
+        } else if (right < 0) {
+          multiplicationReq(left, right + 1, acc - left)
+        } else if (`Boolean Operators`.or(right == 0, left == 0)) {
+          acc
+        }
+        else multiplicationReq(left, right - 1, acc + left)
+      }
 
-    val power: (BigInt, BigInt) => BigInt = ???
+      multiplicationReq(left, right, acc = 0)
+    }
 
-    val fermatNumber: Int => BigInt = ???
+
+    val power: (BigInt, BigInt) => BigInt = (left, right) => {
+      @tailrec
+      def powerRecursive(x: BigInt, y: BigInt, res: BigInt): BigInt = {
+        if (y == 0) {
+          res;
+        } else if (y < 0) {
+          powerRecursive(x, y + 1, multiplication(x, res));
+        } else {
+          powerRecursive(x, y - 1, multiplication(x, res));
+        }
+      }
+
+      powerRecursive(left, right, 1);
+    }
+
+
+    val fermatNumber: Int => BigInt = n => {
+      require(n >= 0, "Negative n is not allowed")
+      power(BigInt(2), power(BigInt(2), BigInt(n))) + 1
+    }
 
   end `Fermat Numbers`
 
   object `Look-and-say Sequence` :
-    val lookAndSaySequenceElement: Int => BigInt = ???
+    val lookAndSaySequenceElement: Int => BigInt = num => {
+      def calculateNextTerm(s: String): String = {
+        s.foldLeft(List.empty[(Char, Int)]) {
+          case (Nil, char) =>
+            (char, 1) :: Nil
+          case ((prevChar, count) :: tail, char) if prevChar == char =>
+            (char, count + 1) :: tail
+          case (acc, char) =>
+            (char, 1) :: acc
+        }.reverse.map { case (digit, count) => s"$count$digit" }.mkString
+      }
+
+      @tailrec
+      def generateModifiedSequence(current: String, remaining: Int): String =
+        if (remaining == 1) {
+          current
+        } else {
+          generateModifiedSequence(calculateNextTerm(current), remaining - 1)
+        }
+
+      require(num > 0, "num is more than 0")
+      BigInt(generateModifiedSequence("1", num))
+    }
 
   end `Look-and-say Sequence`
-
+ 
 end Homework
+

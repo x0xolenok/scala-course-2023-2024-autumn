@@ -43,42 +43,34 @@ object Homework :
     val int = 42
 
     def not(b: Boolean): Boolean =  {
-      if (b) {
-        false
-      } else {
-        true
-      }
-    }
-    
-    def and(left: Boolean, right: Boolean): Boolean = {
-      if (left) {
-        right
-      } else {
-        false
-      }
+      if b then false else true
     }
 
-    def or(left: Boolean, right: Boolean): Boolean = {
-      if (left) {
-        true
-      } else right
+    def and(left: Boolean, right: => Boolean): Boolean = {
+      if left then right else false
+    }
+
+    def or(left: Boolean, right: => Boolean): Boolean = {
+      if left then true else right
     }
 
   end `Boolean Operators`
 
   object `Fermat Numbers` :
 
+
     val multiplication: (BigInt, BigInt) => BigInt = (left, right) => {
       @tailrec
       def multiplicationReq(left: BigInt, right: BigInt, acc: BigInt): BigInt = {
-        if (`Boolean Operators`.and(right < 0, left < 0)) {
+        if (right < 0 && left < 0) {
           multiplicationReq(-left, -right, acc)
         } else if (right < 0) {
           multiplicationReq(left, right + 1, acc - left)
-        } else if (`Boolean Operators`.or(right == 0, left == 0)) {
+        } else if (right == 0 || left == 0) {
           acc
+        } else {
+          multiplicationReq(left, right - 1, acc + left)
         }
-        else multiplicationReq(left, right - 1, acc + left)
       }
 
       multiplicationReq(left, right, acc = 0)
@@ -134,6 +126,6 @@ object Homework :
     }
 
   end `Look-and-say Sequence`
- 
+
 end Homework
 

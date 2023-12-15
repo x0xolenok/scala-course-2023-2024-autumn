@@ -5,10 +5,16 @@ import org.scalacheck._
 import Prop.{forAll, propBoolean, throws}
 import karazin.scala.users.group.week2.homework.arbitraries
 import Homework._
+import karazin.scala.users.group.week2.arbitraries.restricted.{Integer, NegativeInteger, PositiveInteger, Zero}
 import utils._
+import scala.language.implicitConversions
 
 object HomeworkSpecification extends Properties("Homework"):
-  import arbitraries.{given Arbitrary[Int], given Arbitrary[Rational]}
+
+  import arbitraries.{
+    given Arbitrary[Int], given Arbitrary[Rational], given Arbitrary[NegativeInteger],
+    given Arbitrary[Integer], given Arbitrary[Zero], given Arbitrary[PositiveInteger]
+  }
 
   property("throw exception due to zero denominator") = forAll { (numer: Int) ⇒
     throws(classOf[IllegalArgumentException]) {
@@ -22,7 +28,7 @@ object HomeworkSpecification extends Properties("Homework"):
     }
   }
 
-  property("check that rational number is simplified") = forAll { (numer: Int, int: Int) ⇒
+  property("check that rational number is simplified") = forAll { (numer: Integer, int: PositiveInteger) ⇒
     val denom = abs(int) + 1
     val rational = Rational(numer, denom)
 
@@ -51,46 +57,46 @@ object HomeworkSpecification extends Properties("Homework"):
 
   property("negation") = forAll { (rational: Rational) =>
     val negation = -rational
-    val negationFunc = Rational(-rational.numer,rational.denom)
+    val negationFunc = Rational(-rational.numer, rational.denom)
     negation == negationFunc
   }
 
   property("addition") = forAll { (left: Rational, right: Rational) =>
     val addition = left + right
-    val additionFunc = Rational(left.numer * right.denom + right.numer * left.denom,
-      left.denom * right.denom)
+    val additionFunc = Rational(left.numer * right.denom + right.numer * left.denom, left.denom * right.denom)
     addition == additionFunc
   }
 
   property("subtraction") = forAll { (left: Rational, right: Rational) =>
     val subtraction = left - right
-    val subtractionFunc = left + (-right)
+    val subtractionFunc = Rational(left.numer * right.denom - right.numer * left.denom, left.denom * right.denom)
     subtraction == subtractionFunc
-
   }
 
   property("multiplication") = forAll { (left: Rational, right: Rational) =>
     val multiplication = left * right
-    val multiplicationFunc = new Rational(
-      left.numer * right.numer,
-      left.denom * right.denom
-    )
+    val multiplicationFunc = Rational(left.numer * right.numer, left.denom * right.denom)
     multiplication == multiplicationFunc
   }
 
-  property("division") = forAll { (left: Rational, numer: Int, denom: Int) =>
-    val right = Rational(if numer <= 0 then 1 else numer, abs(denom) + 1)
-    val division = left / right
-    val divisionFunc = new Rational(
-      left.numer * right.denom,
-      left.denom * right.numer
-    )
-    division == divisionFunc
+  property("divisionPositive") = forAll { (left: Rational, numer: PositiveInteger, denom: PositiveInteger) =>
+    val right = Rational(numer, denom)
+    val res = left / right
+    val divPositive = Rational(left.numer * right.denom, left.denom * right.numer)
+    res == divPositive
   }
 
-  property("division by zero") = forAll { (left: Rational, int: Int) =>
-    throws(classOf[IllegalArgumentException]){
-      val result = left / Rational(0,int)
+  property("divisionNegative") = forAll { (left: Rational, numer: NegativeInteger, denom: PositiveInteger) =>
+    val right = Rational(numer, denom)
+    val res = left / right
+    val sign = Math.signum((left.denom * right.numer).toFloat).toInt
+    val divNegative = Rational(left.numer * right.denom * sign, abs(left.denom * right.numer))
+    res == divNegative
+  }
+
+  property("division by zero") = forAll { (left: Rational, zero: Zero) =>
+    throws(classOf[IllegalArgumentException]) {
+      val res = left / Rational(zero)
     }
   }
 

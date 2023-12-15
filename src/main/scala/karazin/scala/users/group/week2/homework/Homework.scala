@@ -1,6 +1,6 @@
 package karazin.scala.users.group.week2.homework
 
-import scala.annotation.targetName
+import scala.annotation.{tailrec, targetName}
 import scala.math.{abs, signum}
 
 object Homework:
@@ -35,46 +35,47 @@ object Homework:
 
     @targetName("addition")
     infix def +(that: Rational): Rational =
-      new Rational(
-        this.numer * that.denom + that.numer * this.denom,
-        this.denom * that.denom
-      )
+      new Rational(this.numer * that.denom + that.numer * this.denom, this.denom * that.denom)
 
     @targetName("negation")
-    infix def unary_- : Rational =
-      new Rational(-this.numer, this.denom)
+    infix def unary_- : Rational = new Rational(-this.numer, this.denom)
 
     @targetName("subtraction")
     infix def -(that: Rational): Rational =
-      this + (-that)
+      new Rational(this.numer * that.denom - that.numer * this.denom, this.denom * that.denom)
 
     @targetName("multiplication")
-    infix def *(that: Rational): Rational =
-      new Rational(
-        this.numer * that.numer,
-        this.denom * that.denom
-      )
+    infix def *(that: Rational): Rational = new Rational(this.numer * that.numer, this.denom * that.denom)
 
     @targetName("division")
     infix def /(that: Rational): Rational =
-      new Rational(
-        this.numer * that.denom,
-        this.denom * that.numer
-      )
+      require(that.numer != 0, "Div by zero")
+      val sign = signum(this.denom * that.numer)
+      Rational(this.numer * that.denom * sign, this.denom * abs(that.numer))
+
 
     override def toString: String = s"${this.numer}/${this.denom}"
 
+    @tailrec
     private def gcd(a: Int, b: Int): Int =
       if b == 0 then a else gcd(b, a % b)
 
     private lazy val g = gcd(abs(x), y)
 
-    override def equals(other: Any): Boolean =
-      other match {
-        case that: Rational => this.numer == that.numer && this.denom == that.denom
-        case _ => false
-      }
 
+    private def canEqual(other: Any): Boolean = other.isInstanceOf[Rational]
+
+    override def equals(other: Any): Boolean = other match
+      case that: Rational =>
+        that.canEqual(this) &&
+          numer == that.numer &&
+          denom == that.denom &&
+          this.hashCode() == that.hashCode()
+      case _ => false
+
+    override def hashCode(): Int =
+      val state = Seq(numer, denom)
+      state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   end Rational
 
 end Homework

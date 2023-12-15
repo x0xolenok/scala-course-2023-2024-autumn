@@ -27,8 +27,9 @@ object BooleanOperatorsSpecification extends Properties("Boolean Operators"):
 
     and(left, right) == (left && right)
   }
+
   property("test eager and") = propBoolean {
-    !and(left = false, throw new IllegalArgumentException)
+    !and(left = false, throw new IllegalArgumentException("test is failed"))
   }
 
   property("or") = forAll { (pair: (Boolean, Boolean)) =>
@@ -36,8 +37,9 @@ object BooleanOperatorsSpecification extends Properties("Boolean Operators"):
 
     or(left, right) == (left || right)
   }
+
   property("test eager or") = propBoolean {
-    or( left = true, throw new IllegalArgumentException)
+    or( left = true, throw new IllegalArgumentException("test is failed"))
   }
 
 end BooleanOperatorsSpecification
@@ -56,17 +58,16 @@ object FermatNumbersSpecification extends Properties("Fermat Numbers"):
   property("throw exception due to negative n") = forAll { (n: Int) =>
     throws(classOf[IllegalArgumentException]) {
       if(n == 0) {
-        fermatNumber(-4)
+        fermatNumber(-1)
       } else {
-        val x = -Math.abs(n)
-        fermatNumber(x)
+        fermatNumber(-n)
       }
     }
   }
 
   property("fermatNumber") = forAll { (n: Int) =>
-    fermatNumber(n) == Math.pow(2, Math.pow(2, n)) + 1
-  }  
+    fermatNumber(n) == BigInt(2).pow(BigInt(2).pow(n).toInt) + 1
+  }
 
 end FermatNumbersSpecification
 
@@ -80,8 +81,7 @@ object LookAndAaSequenceSpecification extends Properties("Look-and-say Sequence"
       if (n == 0) {
         lookAndSaySequenceElement(-3)
       } else {
-        val c = -Math.abs(n)
-        lookAndSaySequenceElement(c)
+        lookAndSaySequenceElement(-n)
       }
     }
   }
